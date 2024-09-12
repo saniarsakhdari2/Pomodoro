@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pomodoro Coffee Timer</title>
+    <link rel="icon" href="d51c0d5cbfcc2f63f59b6f77f8703223_b9d9c324300786809f97fb7281313f46.png" type="image/x-icon">
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            text-align: center;
+            background-color: #f0f8ff;
+            color: #333;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            height: 100vh;
+        }
+
+        h1 {
+            color: #4682b4;
+        }
+
+        #timer {
+            font-size: 48px;
+            margin-bottom: 20px;
+            color: #1e90ff;
+        }
+
+        button {
+            padding: 10px 20px;
+            font-size: 18px;
+            border: none;
+            background-color: #4682b4;
+            color: white;
+            cursor: pointer;
+            border-radius: 5px;
+        }
+
+        #coffee-animation {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            display: none;
+        }
+
+        .cup {
+            width: 100px;
+            height: 150px;
+            background-color: #dcdcdc;
+            position: relative;
+            border-radius: 0 0 50px 50px;
+            overflow: hidden;
+            border: 5px solid #8b4513;
+        }
+
+        .coffee {
+            position: absolute;
+            bottom: 0;
+            width: 100%;
+            height: 0;
+            background-color: #6b4f3a;
+        }
+
+        .steam {
+            position: absolute;
+            top: -50px;
+            left: 50%;
+            width: 5px;
+            height: 80px;
+            background-color: rgba(255, 255, 255, 0.5);
+            border-radius: 50%;
+            animation: steam 2s infinite ease-in-out;
+        }
+
+        @keyframes steam {
+            0% {
+                transform: translateX(-50%) translateY(0);
+                opacity: 1;
+            }
+            100% {
+                transform: translateX(-50%) translateY(-80px);
+                opacity: 0;
+            }
+        }
+    </style>
+</head>
+<body>
+    <h1>Pomodoro Coffee Timer</h1>
+    <div id="timer">25:00</div>
+    <button id="startButton">Start Pomodoro</button>
+    
+    <div id="coffee-animation">
+        <div class="cup">
+            <div class="coffee"></div>
+        </div>
+        <div class="steam"></div>
+        <div class="steam" style="left: 45%; animation-delay: 0.5s;"></div>
+        <div class="steam" style="left: 55%; animation-delay: 1s;"></div>
+    </div>
+
+    <script>
+        let timerDisplay = document.getElementById('timer');
+        let startButton = document.getElementById('startButton');
+        let coffeeAnimation = document.getElementById('coffee-animation');
+        let coffeeElement = document.querySelector('.coffee');
+
+        let workTime = 25 * 60; // 25 minutes in seconds
+        let breakTime = 5 * 60;  // 5 minutes in seconds
+        let timer;
+        let isWorkTime = true;
+        let totalTime;
+
+        function startTimer(duration, breakDuration) {
+            let remainingTime = duration;
+            totalTime = duration;  // Store the total time for calculating coffee height
+
+            coffeeElement.style.height = "0"; // Reset coffee fill height
+
+            timer = setInterval(() => {
+                let minutes = Math.floor(remainingTime / 60);
+                let seconds = remainingTime % 60;
+                timerDisplay.textContent = `${minutes}:${seconds < 10 ? '0' + seconds : seconds}`;
+
+                // Update coffee fill based on time left
+                let coffeeHeight = ((totalTime - remainingTime) / totalTime) * 100;
+                coffeeElement.style.height = `${coffeeHeight}%`;
+
+                if (--remainingTime < 0) {
+                    clearInterval(timer);
+                    if (isWorkTime) {
+                        // Entering break time, restart the timer and animation
+                        coffeeAnimation.style.display = 'block';
+                        timerDisplay.textContent = 'Break Time! Coffee is brewing...';
+                        isWorkTime = false;
+                        startTimer(breakDuration, breakDuration);
+                    } else {
+                        // Back to work
+                        coffeeAnimation.style.display = 'none';
+                        isWorkTime = true;
+                        startTimer(workTime, breakDuration);
+                    }
+                }
+            }, 1000);
+        }
+
+        startButton.addEventListener('click', () => {
+            coffeeAnimation.style.display = 'block';
+            startTimer(workTime, breakTime);
+        });
+    </script>
+</body>
+</html>
